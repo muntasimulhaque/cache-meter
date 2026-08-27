@@ -128,14 +128,23 @@ GET localhost:<gateway-port>/api/plugins/cache-meter/summary
 
 ## Uninstall
 
-```bash
-hermes plugins remove cache-meter
-```
+The plugin has two halves; remove both or the status-bar chip and its Settings
+entry survive the uninstall.
 
-One-click installs also leave the chip's standalone copy: delete
-`$HERMES_HOME/desktop-plugins/cache-meter/` (Settings → Plugins → Desktop
-plugins → Cache Meter → folder icon reveals it), or the chip keeps rendering
-with a dead backend.
+1. Remove the agent package (the stats backend):
+
+   ```bash
+   hermes plugins remove cache-meter
+   ```
+
+   If this fails with "Access is denied", quit Hermes completely and run it again.
+
+2. Delete the chip's copy. On Windows: press `Win+R`, paste
+   `%LOCALAPPDATA%\hermes\desktop-plugins`, Enter, and delete the `cache-meter`
+   folder. On macOS/Linux: `rm -rf ~/.hermes/desktop-plugins/cache-meter`.
+
+The chip and its Settings row disappear within a few seconds, or after reopening
+the desktop app.
 
 ## How the ratio is computed
 

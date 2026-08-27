@@ -38,25 +38,41 @@ automatically.
 
 Requirements: [Hermes Agent](https://github.com/NousResearch/hermes-agent) with the desktop app, any OS.
 
+### One click (recommended)
+
+**[Install in Hermes](hermes://plugin/install?repo=muntasimulhaque/cache-meter&enable=1)**
+
+The link opens the Hermes desktop app with an install dialog that pre-checks both halves
+(Agent plugin + Desktop status-bar chip). Confirm once and the chip appears in the status
+bar: no toggles, no restart, no terminal.
+
+Notes:
+
+- If your browser does not open the link, use the CLI route below.
+- Settings → Plugins will list two Cache Meter entries after this install (the standalone
+  chip copy and the package's own desktop half). That is expected; the chip that renders
+  is the one that shows ON.
+
+### CLI
+
 ```bash
 hermes plugins install muntasimulhaque/cache-meter
 hermes plugins enable cache-meter
 ```
 
-Then open the desktop app → Settings → Plugins → toggle **Cache Meter**
-(the desktop half is opt-in by design). No restart needed; if you had Hermes running,
-⌘K → *Reload desktop plugins* is enough.
+Important: this enables the agent half (the stats backend) only. The desktop chip is a
+separate, opt-in half by Hermes' security model, so one more toggle is needed:
 
-Prefer manual? Use any Git client to clone `muntasimulhaque/cache-meter`, then copy the
-`cache-meter` folder into `$HERMES_HOME/plugins/` and run `hermes plugins enable cache-meter`.
+1. Open the desktop app → Settings → Plugins.
+2. Under **Desktop plugins**, switch **Cache Meter** on.
+
+The chip appears immediately (no restart needed).
+
+Prefer manual? Clone `muntasimulhaque/cache-meter` with any Git client, copy the folder
+into `$HERMES_HOME/plugins/`, and run `hermes plugins enable cache-meter`, then flip the
+desktop toggle as above.
 
 `$HERMES_HOME` is `~/.hermes` by default (`%LOCALAPPDATA%\hermes` on Windows).
-
-One-click from README/web page:
-
-```html
-<a href="hermes://plugin/install?repo=muntasimulhaque/cache-meter&enable=1">Install in Hermes</a>
-```
 
 ## Updating
 
@@ -76,11 +92,15 @@ What that does (Hermes built-in behaviour):
 
 After updating:
 
-- **Chip (JS)**: hot-reloads within seconds; if it looks stale, ⌘K →
-  *Reload desktop plugins* (or reopen the desktop app).
 - **Stats backend (Python)**: mounts once at gateway startup — restart the
   gateway once so code changes take effect (`hermes gateway restart`, or type
   `/restart` inside Hermes).
+- **Chip (JS), one-click installs**: `hermes plugins update` does not touch the
+  chip's standalone copy under `$HERMES_HOME/desktop-plugins/`. Re-run the
+  [install link](hermes://plugin/install?repo=muntasimulhaque/cache-meter&enable=1),
+  check **Force reinstall**, and Install; the chip hot-reloads within seconds.
+- **Chip (JS), CLI installs**: hot-reloads within seconds; if it looks stale,
+  ⌘K → *Reload desktop plugins* (or reopen the desktop app).
 
 To freeze a specific version instead of tracking `main`, install pinned to a
 commit; updates then refuse until you move it:
@@ -110,6 +130,11 @@ GET localhost:<gateway-port>/api/plugins/cache-meter/summary
 ```bash
 hermes plugins remove cache-meter
 ```
+
+One-click installs also leave the chip's standalone copy: delete
+`$HERMES_HOME/desktop-plugins/cache-meter/` (Settings → Plugins → Desktop
+plugins → Cache Meter → folder icon reveals it), or the chip keeps rendering
+with a dead backend.
 
 ## How the ratio is computed
 

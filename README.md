@@ -43,8 +43,10 @@ Requirements: [Hermes Agent](https://github.com/NousResearch/hermes-agent) with 
 **[Install in Hermes](https://muntasimulhaque.github.io/cache-meter/)**
 
 The page hands off to the Hermes desktop app with an install dialog that pre-checks both
-(Agent plugin + Desktop status-bar chip). Confirm once and the chip appears in the status
-bar: no toggles, no restart, no terminal.
+halves (Agent plugin + Desktop status-bar chip). Confirm once and the chip appears in the
+status bar: no toggles, no restart, no terminal. If Hermes was already running during the
+install, restart it once (fully quit + reopen) so the stats backend loads; until then the
+chip shows live `↑↓` totals with a `*` marker.
 
 Notes:
 
@@ -121,6 +123,12 @@ from this machine (mid-session):
 ```
 ↑267k ↓79k R12.7M CH 97.9%
 ```
+
+Full mode shows `R` (cache reads), `W` (writes) and `CH %`. If you instead see only
+`↑… ↓…` with a `*` suffix, the chip is in **live-totals mode**: the Python backend
+was not loaded when Hermes started. Hermes mounts plugin APIs once at startup, so
+an install performed while the app was already running needs one restart
+(fully quit Hermes, reopen). Hover or click the chip for the breakdown.
 
 CLI check without the UI (GET the summary endpoint; replace the port with your
 gateway's local port):

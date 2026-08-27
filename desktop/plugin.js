@@ -37,28 +37,38 @@ async function fetchUsage(rest, sessionId) {
   // no gateway restart needed after install; updated at most ~a turn behind).
   try {
     const u = await rest(`/usage/${encodeURIComponent(sessionId)}`)
-    if (u && !u.error) return u
+    if (u && !u.error) return { data: u, backend: true }
+    // A JSON error body here usually means the backend is not mounted yet:
+    // Hermes mounts plugin APIs once at web-server startup, so an install
+    // that landed while the app was already running needs an app restart.
+    if (u && u.error) return { data: null, backend: false, backendError: String(u.error) }
   } catch {
     /* backend disabled or older mount - fall through */
   }
-  // Fallback: gateway RPC (only has cache fields on patched builds).
+  // Fallback: gateway RPC (live totals, NO cache breakdown on stock builds).
   try {
     const u = await host.request('session.usage', { session_id: sessionId })
-    if (u && typeof u === 'object' && !u.error) return u
+    if (u && typeof u === 'object' && !u.error) return { data: u, backend: false }
   } catch {
     /* detached session etc. */
   }
-  return null
+  return { data: null, backend: false }
 }
 
 function CacheMeterChip({ rest }) {
   const sessionId = useValue(host.state.activeSessionId)
   const [usage, setUsage] = useState(null)
+  const [degraded, setDegraded] = useState(false)
 
   useEffect(() => {
     if (!sessionId) return undefined
     let alive = true
-    const tick = () => fetchUsage(rest, sessionId).then(u => { if (alive) setUsage(u) })
+    const tick = () =>
+      fetchUsage(rest, sessionId).then(res => {
+        if (!alive) return
+        setUsage(res.data)
+        setDegraded(!res.backend)
+      })
     tick()
     const iv = setInterval(tick, POLL_MS)
     return () => { alive = false; clearInterval(iv) }
@@ -81,6 +91,9 @@ function CacheMeterChip({ rest }) {
   const ctxPct = usage.context_percent != null ? Math.max(0, Math.min(100, Math.round(usage.context_percent))) : null
 
   const tipLines = [
+    ...(degraded
+      ? ['⚠ live totals only - cache stats backend not loaded.', '  Restart Hermes once (fully quit + reopen) to enable it.', '']
+      : []),
     `↑ uncached input    ${fmtTok(usage.input)}`,
     `↓ output            ${fmtTok(usage.output)}`,
     `R served from cache ${fmtTok(usage.cache_read)}`,
@@ -99,14 +112,15 @@ function CacheMeterChip({ rest }) {
     children: jsx('button', {
       className: cn(
         'inline-flex h-full max-w-[26rem] items-center gap-1.5 overflow-hidden px-1.5 text-[0.6875rem] transition-colors',
-        'tabular-nums text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground'
+        'tabular-nums text-(--ui-text-tertiary) hover:bg-(--chrome-action-hover) hover:text-foreground',
+        degraded && 'opacity-60'
       ),
       type: 'button',
       onClick: () => {
         haptic('tap')
-        host.notify({ kind: 'info', message: `Cache meter\n${tipLines.join('\n')}` })
+        host.notify({ kind: degraded ? 'warning' : 'info', message: `Cache meter\n${tipLines.join('\n')}` })
       },
-      children: jsx('span', { className: 'whitespace-nowrap', children: parts.join(' ') })
+      children: jsx('span', { className: 'whitespace-nowrap', children: parts.join(' ') + (degraded ? ' *' : '') })
     })
   })
 }

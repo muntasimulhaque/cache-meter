@@ -88,6 +88,35 @@ def _open_db(profile: str):
     return db
 
 
+def _resolve_session_id(db, session_id: str):
+    """Map a desktop *runtime* session id to the stored row id.
+
+    The desktop status bar speaks runtime ids (short-lived, gateway memory);
+    state.db rows use stored ids (``20260827_...``). Try the stored id first,
+    then ask the in-process gateway registry for the mapping. Fails soft:
+    returns None and the caller answers ``not found``.
+    """
+    if db.get_session(session_id):
+        return session_id
+    try:
+        from tui_gateway import server as tg  # same process as the web server
+
+        for rid, s in (getattr(tg, "_sessions", None) or {}).items():
+            agent = (s or {}).get("agent")
+            candidates = (
+                rid,
+                str((s or {}).get("session_key") or ""),
+                str(getattr(agent, "session_id", "") or ""),
+            )
+            if session_id in candidates:
+                for cand in candidates:
+                    if cand and cand != rid and db.get_session(cand):
+                        return cand
+    except Exception:
+        pass
+    return None
+
+
 @router.get("/usage/{session_id}")
 async def usage(session_id: str, profile: str = "") -> dict[str, Any]:
     """pi-style usage snapshot for one session, from its stored session row."""
@@ -96,7 +125,8 @@ async def usage(session_id: str, profile: str = "") -> dict[str, Any]:
     except ImportError:
         return {"error": "hermes_state unavailable outside a Hermes install"}
     try:
-        row = db.get_session(session_id)
+        resolved = _resolve_session_id(db, session_id)
+        row = db.get_session(resolved) if resolved else None
     finally:
         db.close()
     if not row:

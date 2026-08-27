@@ -243,6 +243,15 @@ def main() -> int:
     pkg_dir = plugins_dir / PLUGIN_ID
     print(f"Hermes home: {home}")
 
+    # The script lives inside the package it deletes. Park a copy in temp so a
+    # "quit Hermes and run again" rerun still has a script to run.
+    rerun_copy: Path | None = None
+    try:
+        rerun_copy = Path(tempfile.gettempdir()) / "cache-meter-uninstall.py"
+        shutil.copy(__file__, rerun_copy)
+    except OSError:
+        rerun_copy = None
+
     if hermes_running():
         print()
         print("NOTE: Hermes is currently running. Its folder watchers can hold")
@@ -305,6 +314,10 @@ def main() -> int:
         print("Quit Hermes completely (including the tray icon), then run this")
         print("script once more: it skips everything already removed and")
         print("finishes the job.")
+        if rerun_copy is not None and rerun_copy.exists():
+            print()
+            print("Rerun command (the copy parked in your temp folder):")
+            print(f'  python "{rerun_copy}"')
         return 1
 
     print()

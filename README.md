@@ -131,25 +131,36 @@ GET localhost:<gateway-port>/api/plugins/cache-meter/summary
 
 ## Uninstall
 
-The plugin has two halves; remove both or the status-bar chip and its Settings
-entry survive the uninstall.
+One command removes everything (both halves, plus any debris a failed removal
+left behind). Run this INSTEAD of `hermes plugins remove`:
 
-1. Remove the agent package (the stats backend):
+- Windows (PowerShell):
 
-   ```bash
-   hermes plugins remove cache-meter
-   ```
+  ```powershell
+  python "$env:LOCALAPPDATA\hermes\plugins\cache-meter\uninstall.py"
+  ```
 
-   On Windows this can fail with "Access is denied" while Hermes is running
-   (the gateway keeps a handle on the installed folder). If it does: quit
-   Hermes completely, run the command again, then reopen Hermes.
+- macOS / Linux:
 
-2. Delete the chip's copy. On Windows: press `Win+R`, paste
-   `%LOCALAPPDATA%\hermes\desktop-plugins`, Enter, and delete the `cache-meter`
-   folder. On macOS/Linux: `rm -rf ~/.hermes/desktop-plugins/cache-meter`.
+  ```bash
+  python3 ~/.hermes/plugins/cache-meter/uninstall.py
+  ```
 
-The chip and its Settings row disappear within a few seconds, or after reopening
-the desktop app.
+The script cleans the desktop chip, the agent package, leftover staging dirs
+(phantom rows that appear in Settings after a failed remove), and the matching
+`config.yaml` entries (a timestamped backup is written first). It is safe to
+run twice.
+
+On Windows, Hermes' folder watchers can hold the installed package open while
+the app is running; if the script reports leftovers, quit Hermes completely
+(including the tray icon) and run the same command once more: it skips
+everything already removed and finishes the job.
+
+Removed the script already but still see the plugin? Delete the remains by
+hand: agent package at `%LOCALAPPDATA%\hermes\plugins\cache-meter`
+(`~/.hermes/plugins/cache-meter`), chip copy at
+`%LOCALAPPDATA%\hermes\desktop-plugins\cache-meter`
+(`~/.hermes/desktop-plugins/cache-meter`).
 
 ## How the ratio is computed
 

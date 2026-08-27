@@ -58,6 +58,37 @@ One-click from README/web page:
 <a href="hermes://plugin/install?repo=muntasimulhaque/cache-meter&enable=1">Install in Hermes</a>
 ```
 
+## Updating
+
+There is **no auto-update** — your install stays at whatever revision you pulled,
+and new features land only when you ask for them:
+
+```bash
+hermes plugins update cache-meter
+```
+
+What that does (Hermes built-in behaviour):
+
+1. `git pull`s the latest `main` from this repo into your installed copy.
+2. Re-runs the security scan — if an update is flagged dangerous, the plugin is
+   **disabled automatically** instead of staying active.
+3. Records the new revision in the install metadata.
+
+After updating:
+
+- **Chip (JS)**: hot-reloads within seconds; if it looks stale, ⌘K →
+  *Reload desktop plugins* (or reopen the desktop app).
+- **Stats backend (Python)**: mounts once at gateway startup — restart the
+  gateway once so code changes take effect (`hermes gateway restart`, or type
+  `/restart` inside Hermes).
+
+To freeze a specific version instead of tracking `main`, install pinned to a
+commit; updates then refuse until you move it:
+
+```bash
+hermes plugins install muntasimulhaque/cache-meter --force --ref <40-char-commit-sha>
+```
+
 ## Verify it works
 
 Send the agent a couple of messages, then look at the status-bar chip. Real example

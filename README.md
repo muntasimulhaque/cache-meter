@@ -47,13 +47,8 @@ Then open the desktop app → Settings → Plugins → toggle **Cache Meter**
 (the desktop half is opt-in by design). No restart needed; if you had Hermes running,
 ⌘K → *Reload desktop plugins* is enough.
 
-Prefer manual? Clone and copy the folder:
-
-```bash
-git clone https://github.com/muntasimulhaque/cache-meter.git
-cp -r cache-meter "$HERMES_HOME/plugins/"
-hermes plugins enable cache-meter
-```
+Prefer manual? Use any Git client to clone `muntasimulhaque/cache-meter`, then copy the
+`cache-meter` folder into `$HERMES_HOME/plugins/` and run `hermes plugins enable cache-meter`.
 
 `$HERMES_HOME` is `~/.hermes` by default (`%LOCALAPPDATA%\hermes` on Windows).
 
@@ -72,10 +67,11 @@ from this machine (mid-session):
 ↑267k ↓79k R12.7M CH 97.9%
 ```
 
-CLI check without the UI:
+CLI check without the UI (GET the summary endpoint; replace the port with your
+gateway's local port):
 
-```bash
-curl -s localhost:<gateway-port>/api/plugins/cache-meter/summary | python -m json.tool
+```
+GET localhost:<gateway-port>/api/plugins/cache-meter/summary
 ```
 
 ## Uninstall

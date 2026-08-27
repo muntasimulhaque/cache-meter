@@ -1,0 +1,7 @@
+{
+  "name": "cache-meter",
+  "label": "Cache Meter",
+  "description": "pi-style cache hit ratio, token and cost stats backend. Mounted at /api/plugins/cache-meter/.",
+  "version": "0.1.0",
+  "api": "plugin_api.py"
+}

@@ -1,0 +1,10 @@
+name: cache-meter
+version: 0.1.0
+description: "pi-style prompt-cache stats for the Hermes desktop status bar: cache-read / cache-write tokens, live cache-hit ratio (CH%), estimated cost, and context usage. Reads your own state.db - no core patches, no config changes."
+author: muntasimulhaque
+license: MIT
+kind: standalone
+platforms:
+  - linux
+  - macos
+  - windows

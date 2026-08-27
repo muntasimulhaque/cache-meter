@@ -99,9 +99,12 @@ After updating:
   is not touched by `hermes plugins update`. Re-run the
   [install link](https://muntasimulhaque.github.io/cache-meter/),
   check **Force reinstall**, and **untick Agent plugin** (tick Desktop UI only),
-  then Install; the chip hot-reloads within seconds. (Keeping Agent ticked
-  force-reinstalls a folder the running gateway may hold open: on Windows that
-  fails with Access denied.)
+  then Install; the chip hot-reloads within seconds.
+
+  Ticking **Agent plugin** with Force reinstall tries to replace the installed
+  package folder, which the running gateway holds open on Windows, so it fails
+  with "Access is denied". That is why the backend gets its own update command
+  above. Same recovery as uninstall: quit Hermes, retry, reopen.
 
 To freeze a specific version instead of tracking `main`, install pinned to a
 commit; updates then refuse until you move it:
@@ -137,7 +140,9 @@ entry survive the uninstall.
    hermes plugins remove cache-meter
    ```
 
-   If this fails with "Access is denied", quit Hermes completely and run it again.
+   On Windows this can fail with "Access is denied" while Hermes is running
+   (the gateway keeps a handle on the installed folder). If it does: quit
+   Hermes completely, run the command again, then reopen Hermes.
 
 2. Delete the chip's copy. On Windows: press `Win+R`, paste
    `%LOCALAPPDATA%\hermes\desktop-plugins`, Enter, and delete the `cache-meter`

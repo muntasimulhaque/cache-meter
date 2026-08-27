@@ -37,6 +37,14 @@ except Exception:  # Allows unit tests without dashboard dependencies.
 
 router = APIRouter()
 
+
+def register(ctx) -> None:
+    """Hermes plugin-manager entry point. This plugin is API-only (it serves
+    `router` for the dashboard web server) and registers no tools, hooks or
+    slash commands, so this is intentionally a no-op. Present so the manager
+    does not flag the plugin as broken on load."""
+    return None
+
 # Exclusive sources: subagent runs and kanban dispatcher workers are not user turns.
 _DENY_SOURCES = ("tool", "kanban")
 

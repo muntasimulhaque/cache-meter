@@ -40,9 +40,9 @@ Requirements: [Hermes Agent](https://github.com/NousResearch/hermes-agent) with 
 
 ### One click (recommended)
 
-**[Install in Hermes](hermes://plugin/install?repo=muntasimulhaque/cache-meter&enable=1)**
+**[Install in Hermes](https://muntasimulhaque.github.io/cache-meter/)**
 
-The link opens the Hermes desktop app with an install dialog that pre-checks both halves
+The page hands off to the Hermes desktop app with an install dialog that pre-checks both
 (Agent plugin + Desktop status-bar chip). Confirm once and the chip appears in the status
 bar: no toggles, no restart, no terminal.
 
@@ -97,7 +97,7 @@ After updating:
   restart`, or `/restart` inside Hermes) for code changes to take effect.
 - **Chip (JS)**: the chip's standalone copy under `$HERMES_HOME/desktop-plugins/`
   is not touched by `hermes plugins update`. Re-run the
-  [install link](hermes://plugin/install?repo=muntasimulhaque/cache-meter&enable=1),
+  [install link](https://muntasimulhaque.github.io/cache-meter/),
   check **Force reinstall**, and **untick Agent plugin** (tick Desktop UI only),
   then Install; the chip hot-reloads within seconds. (Keeping Agent ticked
   force-reinstalls a folder the running gateway may hold open: on Windows that

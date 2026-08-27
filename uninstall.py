@@ -287,11 +287,36 @@ def main() -> int:
     else:
         print("Agent package: already absent")
 
-    # 3) Ghost staging dirs left by failed removes (they show up as phantom
-    #    plugin rows in Settings that cannot be toggled).
+    # 3) Ghost staging dirs left by failed removes/installs (they show up as
+    #    phantom plugin rows in Settings that cannot be toggled).
     ghosts = sorted(plugins_dir.glob(f".{PLUGIN_ID}.remove-*")) + sorted(
         plugins_dir.glob(f".{PLUGIN_ID}.uninstall-*")
     )
+    # Generic install staging (.install-<random>) is shared across plugins and
+    # may belong to a LIVE install of something else - only take dirs that
+    # verifiably contain a cache-meter copy.
+    for candidate in sorted(plugins_dir.glob(".install-*")):
+        if not candidate.is_dir():
+            continue
+        marker_hit = False
+        try:
+            for probe in candidate.rglob("plugin.yaml"):
+                try:
+                    if PLUGIN_ID in probe.read_text(encoding="utf-8", errors="ignore")[:2000]:
+                        marker_hit = True
+                        break
+                except OSError:
+                    continue
+            if not marker_hit:
+                for probe in candidate.rglob(".git"):
+                    cfg = probe / "config"
+                    if cfg.is_file() and PLUGIN_ID in cfg.read_text(encoding="utf-8", errors="ignore"):
+                        marker_hit = True
+                        break
+        except OSError:
+            continue
+        if marker_hit:
+            ghosts.append(candidate)
     for ghost in ghosts:
         print(f"Removing leftover staging dir {ghost.name}...", end=" ", flush=True)
         print("done" if retry_rmtree(ghost) else "FAILED (locked; delete after quitting Hermes)")

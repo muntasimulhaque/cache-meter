@@ -49,11 +49,25 @@ def find_hermes_home() -> Path | None:
     return None
 
 
+def _rm_error_handler(func, path, exc_info):
+    """Windows: git marks pack/objects files read-only; rmtree dies on them.
+    Clear the attribute and retry the same delete before giving up."""
+    import stat
+
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except OSError:
+        raise
+
+
 def retry_rmtree(path: Path, attempts: int = 5, delay: float = 1.0) -> bool:
-    """rmtree that retries: Hermes' folder watchers hold transient handles."""
+    """rmtree that clears Windows read-only attributes and retries: git pack
+    files are read-only, and Hermes' folder watchers hold transient handles."""
     for i in range(attempts):
         try:
-            shutil.rmtree(path)
+            if hasattr(shutil, "rmtree"):
+                shutil.rmtree(path, onerror=_rm_error_handler)
             return True
         except FileNotFoundError:
             return True

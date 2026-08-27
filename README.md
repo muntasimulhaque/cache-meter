@@ -92,15 +92,16 @@ What that does (Hermes built-in behaviour):
 
 After updating:
 
-- **Stats backend (Python)**: mounts once at gateway startup — restart the
-  gateway once so code changes take effect (`hermes gateway restart`, or type
-  `/restart` inside Hermes).
-- **Chip (JS), one-click installs**: `hermes plugins update` does not touch the
-  chip's standalone copy under `$HERMES_HOME/desktop-plugins/`. Re-run the
+- **Stats backend (Python)**: `hermes plugins update cache-meter` handles it;
+  the backend mounts once at gateway startup, so restart once (`hermes gateway
+  restart`, or `/restart` inside Hermes) for code changes to take effect.
+- **Chip (JS)**: the chip's standalone copy under `$HERMES_HOME/desktop-plugins/`
+  is not touched by `hermes plugins update`. Re-run the
   [install link](hermes://plugin/install?repo=muntasimulhaque/cache-meter&enable=1),
-  check **Force reinstall**, and Install; the chip hot-reloads within seconds.
-- **Chip (JS), CLI installs**: hot-reloads within seconds; if it looks stale,
-  ⌘K → *Reload desktop plugins* (or reopen the desktop app).
+  check **Force reinstall**, and **untick Agent plugin** (tick Desktop UI only),
+  then Install; the chip hot-reloads within seconds. (Keeping Agent ticked
+  force-reinstalls a folder the running gateway may hold open: on Windows that
+  fails with Access denied.)
 
 To freeze a specific version instead of tracking `main`, install pinned to a
 commit; updates then refuse until you move it:
